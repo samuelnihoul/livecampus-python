@@ -6,21 +6,34 @@ from datetime import datetime
 import os
 import socket
 import time
+import re
+
+def parse_log_line(line):
+    """Parse a single log line and extract relevant information"""
+    # Pattern pour extraire le niveau de log, le message et la station
+    pattern = r'\[(.*?)\] \[(.*?)\] (.*?) - (.*)'
+    match = re.match(pattern, line)
+    
+    if match:
+        timestamp, level, station, message = match.groups()
+        return {
+            'log level': level.lower(),
+            'message': message.strip(),
+            'station': station.strip()
+        }
+    return None
 
 def read_logs(file_path):
-    """Read and process logs from JSON file"""
-    with open(file_path, 'r') as f:
-        logs = json.load(f)
+    """Read and process logs from text file"""
+    logs = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            log_entry = parse_log_line(line)
+            if log_entry:
+                logs.append(log_entry)
     
     # Filter logs with warning or error level
-    filtered_logs = []
-    for log in logs:
-        if log.get('log level', '').lower() in ['warning', 'error']:
-            filtered_logs.append({
-                'log level': log.get('log level', ''),
-                'message': log.get('message', ''),
-                'station': log.get('station', '')
-            })
+    filtered_logs = [log for log in logs if log['log level'] in ['warning', 'error']]
     
     # Sort logs to put errors first
     filtered_logs.sort(key=lambda x: x['log level'] == 'error', reverse=True)
@@ -86,7 +99,7 @@ def export_to_excel(logs, system_info, output_file):
 
 def main():
     # Read and process logs
-    logs = read_logs('logs.json')
+    logs = read_logs('partie2/logs.json')
     
     # Get system information
     system_info = get_system_info()
