@@ -17,7 +17,7 @@ def filter_logs(input_file, output_file):
             filtered_logs = [
                 log for log in logs 
                 if isinstance(log, dict) and 
-                log.get('log level', '').lower() in ['warning', 'error']
+                log['_source']['log']['level'].lower() in ['warning', 'error']
             ]
         else:
             print("Erreur : Le fichier JSON ne contient pas une liste de logs")
