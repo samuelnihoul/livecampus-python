@@ -1,4 +1,4 @@
-from api_helper import GeoAPI
+from partie1.api_helper import GeoAPI
 
 
 def main():
