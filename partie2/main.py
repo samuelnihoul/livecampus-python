@@ -5,45 +5,9 @@ import pandas as pd
 from datetime import datetime
 import os
 import re
+from filter_logs import filter_logs
 
-def parse_log_line(line):
-    """Parse a single log line and extract relevant information"""
-    pattern = r'\[(.*?)\] \[(.*?)\] (.*?) - (.*)'
-    match = re.match(pattern, line)
 
-    if match:
-        timestamp, level, station, message = match.groups()
-        return {
-            'log level': level.lower(),
-            'message': message.strip(),
-            'station': station.strip()
-        }
-    return None
-
-def read_logs(file_path):
-    """Read and process logs from text file"""
-    if not os.path.exists(file_path):
-        print(f" Erreur : Le fichier '{file_path}' est introuvable.")
-        return []
-
-    logs = []
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                log_entry = parse_log_line(line)
-                if log_entry:
-                    logs.append(log_entry)
-
-        # Filtrer uniquement les warnings et erreurs
-        filtered_logs = [log for log in logs if log['log level'] in ['warning', 'error']]
-
-        # Trier en mettant les erreurs en premier
-        filtered_logs.sort(key=lambda x: x['log level'] == 'error', reverse=True)
-        return filtered_logs
-
-    except Exception as e:
-        print(f" Erreur lors de la lecture du fichier : {e}")
-        return []
 
 def get_system_info():
     """Collect system information"""
@@ -110,9 +74,14 @@ def export_to_excel(logs, system_info, output_file):
 def main():
     # Définir le chemin du fichier log
     log_file_path = os.path.join(os.path.dirname(__file__), 'logs.json')
+    filtered_logs_path = os.path.join(os.path.dirname(__file__), 'filtered_logs.json')
 
-    # Lire et traiter les logs
-    logs = read_logs(log_file_path)
+    # Filtrer les logs
+    filter_logs(log_file_path, filtered_logs_path)
+
+    # Lire et traiter les logs filtrés
+    with open(filtered_logs_path, 'r', encoding='utf-8') as f:
+        logs = json.load(f)
 
     # Récupérer les informations système
     system_info = get_system_info()
