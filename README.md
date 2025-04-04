@@ -9,3 +9,8 @@ Ce projet permet d'obtenir la population d'une commune ou d'un département en F
    ```bash
    python3 -m venv venv
    source venv/bin/activate  # Sur Windows : venv\Scripts\activate
+
+
+## setup
+
+Mettre le logs.josn dans partie2
